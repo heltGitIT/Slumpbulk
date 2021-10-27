@@ -134,9 +134,9 @@ def recept():
 
 def tillagning(namnrecept):
     fat = input("Vill du ha receptet onyttigt eller nyttigt? ")
+    f = open("skafferi.txt", "a")
     if fat == "onyttigt":
-        f = open("skafferi.txt", "a")
-        f.write(
+            f.write(
             "Tillagning av " + namnrecept + " på " + fat + " sätt." + "\n"
             "1. " + fatlistprotein[random.randint(0, 3)]+" " + recallaprotein[foodlist.index(namnrecept)]+"\n"
             "2. " + fatlistcarb[random.randint(0, 3)]+" " + recallacarb[foodlist.index(namnrecept)]+"\n"
@@ -145,32 +145,27 @@ def tillagning(namnrecept):
             "!!!!!EXCLAIMER!!!!!"+"\n"
             "Slumpbulk inc tar inte ansvar för hjärt- och kärlsjukdomar."+"\n"
             " " + "\n")
-        
-        f.close()
-        f = open("skafferi.txt", "r")
-        file_c = f.read()
-        print(file_c)
-        f.close()
-        print("Receptet är sparat i ditt skafferi, skafferi.txt")
-        main() 
+           
     elif fat == "nyttigt":
-        f = open("skafferi.txt", "a")
-        f.write( 
+            f.write( 
             "Tillagning av " + namnrecept + " på " + fat + " sätt. " + "\n"
             "1. " + goodlistprotein[random.randint(0, 3)]+" " + recallaprotein[foodlist.index(namnrecept)]+"\n"
             "2. " + goodlistcarb[random.randint(0, 3)]+" " + recallacarb[foodlist.index(namnrecept)]+"\n"
             "3. " + "Lägg till " + recallaside[foodlist.index(namnrecept)]+"\n"
             "Servera och njut av din nyttiga mat"+"\n"
             " " + "\n")
-        f.close()
-        f = open("skafferi.txt", "r")
-        file_c = f.read()
-        print(file_c)
-        f.close()
-        main()
+        
     else:
-        print("Oops, testa igen!")
-        tillagning(namnrecept)
+            print("Oops, testa igen!")
+            tillagning(namnrecept)
+            
+    f = open("skafferi.txt", "r")
+    file_c = f.read()
+    print(file_c)
+    f.close()
+    print("Receptet är sparat i ditt skafferi, skafferi.txt")
+    print("  ")
+    main()
         
 
  
