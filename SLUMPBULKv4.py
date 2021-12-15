@@ -1,23 +1,28 @@
 import random
 from random import randint
 
-fatlistprotein = ["Grilla", "Marinera och grilla", "Fritera", "Smörstek"]
-goodlistprotein = ["Stek", "Koka", "Ugnsbaka", "Micra"]
-fatlistcarb = ["Fritera", "Koka och lägg på ost", "Koka och sautera", "Koka i buljong"]
-goodlistcarb = ["Koka", "Ångkoka", "Blötlägg", "Halstra", "Micra"]
-proteinlist = [] #lista med alla protein man skriver in
-carblist = [] #lista med alla carbs man skriver in
-sidelist = [] #lista med alla tillbehör man skriver in
-kokbok = {} #namn på recept som nyckel. 
-foodlist = [] #namn på recept. Elementen är protein, carb, side för receptet. 
-recallaprotein = [] #protein i sparade maträtter i ordning
-recallacarb = [] #kolhydrater i sparade maträtter i ordning
-recallaside = [] #tillbehör i sparade maträtter i ordning
+cooking_methods = {
+    "nyttigt": {
+        "carbs": ["Koka", "Ångkoka", "Blötlägg", "Halstra", "Micra"],
+        "proteins": ["Stek", "Koka", "Ugnsbaka", "Micra"],
+    },
+    "onyttigt": {
+        "proteins": ["Grilla", "Marinera och grilla", "Fritera", "Smörstek"],
+        "carbs": [
+            "Fritera",
+            "Koka och lägg på ost",
+            "Koka och sautera",
+            "Koka i buljong",
+        ],
+    },
+}
 
-
+proteinlist = []  # lista med alla protein man skriver in
+carblist = []  # lista med alla carbs man skriver in
+sidelist = []  # lista med alla tillbehör man skriver in
+kokbok = {}  # namn på recept -> (protein, carb, side)
 
 print("\033[1m" "Hej och välkommen till slumpbulk!" "\033[0m ")
-
 
 
 def main():
@@ -26,11 +31,12 @@ def main():
     if svar == "kokboken":
         print("Här är din kokbok! ")
         textfil()
-        print("Skickar tillbaka dig till menyn! ")
-        print(" ")
+        print("Skickar tillbaka dig till menyn! \n")
         main()
     elif svar == "förslag":
-        sparat = input("Vill du lägga till ingredienser eller få receptförslag direkt? (ingredienser/recept) ")
+        sparat = input(
+            "Vill du lägga till ingredienser eller få receptförslag direkt? (ingredienser/recept) "
+        )
         if sparat == "ingredienser":
             proteinfunktion()
         elif sparat == "recept":
@@ -43,9 +49,8 @@ def main():
         return
     else:
         main()
-        
-        
-        
+
+
 def textfil():
     f = open("skafferi.txt", "r")
     file_c = f.read()
@@ -61,9 +66,8 @@ def textfil():
     else:
         print("oops, testa igen!")
         textfil()
-        
-        
-        
+
+
 def proteinfunktion():
     proteininput = input("Vad har du för protein? (klar) ")
     if proteininput == "klar":
@@ -73,27 +77,30 @@ def proteinfunktion():
         proteinlist.append(proteininput)
         proteinfunktion()
         return proteinlist
-        
+
+
 def kolhydratfunktion():
     kolhydratinput = input("Vad har du för kolhydrater? (klar) ")
     if kolhydratinput == "klar":
         tillbehörsfunktion()
         return carblist
-    else: 
+    else:
         carblist.append(kolhydratinput)
         kolhydratfunktion()
         return carblist
+
 
 def tillbehörsfunktion():
     tillbehörinput = input("Vad har du för tillbehör? (klar) ")
     if tillbehörinput == "klar":
         göraom()
         return sidelist
-    else: 
+    else:
         sidelist.append(tillbehörinput)
         tillbehörsfunktion()
         return sidelist
-    
+
+
 def göraom():
     ing = input("Har du skrivit i alla dina ingredienser? (ja/nej) ")
     if ing == "ja":
@@ -105,60 +112,60 @@ def göraom():
         göraom()
 
 
-
 def recept():
-    if len(proteinlist+carblist+sidelist) < 3:
+    if any([len(l) == 0 for l in [proteinlist, carblist, sidelist]]):
         print("Du behöver fler ingredienser!")
         main()
     else:
         print("Dagens middag")
-        recettprotein = str((proteinlist[random.randint(0, len(proteinlist)-1)]))
-        recettcarb = str((carblist[random.randint(0, len(carblist)-1)]))
-        recettside = str((sidelist[random.randint(0, len(sidelist)-1)]))
-        print(recettprotein +" " + recettcarb + " " + recettside)
+        recettprotein = random.choice(proteinlist)
+        recettcarb = random.choice(carblist)
+        recettside = random.choice(sidelist)
+        print(f"{recettprotein} {recettcarb} {recettside}")
         svar = input("Är du nöjd med receptet?  (ja/nej) ")
         if svar == "ja":
-            recallaprotein.append(recettprotein)
-            recallacarb.append(recettcarb)
-            recallaside.append(recettside)
             print("Härligt att du hittade nåt gott!")
             namnrecept = input("Döp receptet till: ")
-            kokbok[str(namnrecept)] = str(recettprotein +" " + recettcarb + " " + recettside)
-            foodlist.append(namnrecept)
+            kokbok[namnrecept] = (recettprotein, recettcarb, recettside)
             tillagning(namnrecept)
             return kokbok
         elif svar == "nej":
             recept()
         else:
-            recept()      
+            recept()
+
+
+def write_instructions(recipe_name, healthiness):
+    end_unhealthy = r"""Servera och njut medans du fortfarande lever"
+            !!!!!EXCLAIMER!!!!!
+            Slumpbulk inc tar inte ansvar för hjärt- och kärlsjukdomar.
+        """
+    end_healthy = "Servera och njut av din nyttiga mat"
+    random_protein_cooking = random.choice(cooking_methods[healthiness]["proteins"])
+    random_carb_cooking = random.choice(cooking_methods[healthiness]["carbs"])
+    (protein, carb, side) = kokbok[recipe_name]
+    steps = [
+        f"Tillagning av {recipe_name} på {healthiness} sätt.",
+        f"1. {random_protein_cooking} {protein}",
+        f"2. {random_carb_cooking} {carb}",
+        f"3. Lägg till {side}",
+        end_unhealthy if healthiness == "onyttigt" else end_healthy,
+    ]
+
+    with open("skafferi.txt", "a") as f:
+        f.write("\n".join(steps))
+
 
 def tillagning(namnrecept):
     fat = input("Vill du ha receptet onyttigt eller nyttigt? ")
     f = open("skafferi.txt", "a")
-    if fat == "onyttigt":
-            f.write(
-            "Tillagning av " + namnrecept + " på " + fat + " sätt." + "\n"
-            "1. " + fatlistprotein[random.randint(0, 3)]+" " + recallaprotein[foodlist.index(namnrecept)]+"\n"
-            "2. " + fatlistcarb[random.randint(0, 3)]+" " + recallacarb[foodlist.index(namnrecept)]+"\n"
-            "3. " + "Lägg till " + recallaside[foodlist.index(namnrecept)]+"\n"
-            "Servera och njut medans du fortfarande lever"+"\n"
-            "!!!!!EXCLAIMER!!!!!"+"\n"
-            "Slumpbulk inc tar inte ansvar för hjärt- och kärlsjukdomar."+"\n"
-            " " + "\n")
-           
-    elif fat == "nyttigt":
-            f.write( 
-            "Tillagning av " + namnrecept + " på " + fat + " sätt. " + "\n"
-            "1. " + goodlistprotein[random.randint(0, 3)]+" " + recallaprotein[foodlist.index(namnrecept)]+"\n"
-            "2. " + goodlistcarb[random.randint(0, 3)]+" " + recallacarb[foodlist.index(namnrecept)]+"\n"
-            "3. " + "Lägg till " + recallaside[foodlist.index(namnrecept)]+"\n"
-            "Servera och njut av din nyttiga mat"+"\n"
-            " " + "\n")
-        
+
+    if fat not in ["nyttigt", "onyttigt"]:
+        print("Oops, testa igen!")
+        tillagning(namnrecept)
     else:
-            print("Oops, testa igen!")
-            tillagning(namnrecept)
-            
+        write_instructions(namnrecept, fat)
+
     f = open("skafferi.txt", "r")
     file_c = f.read()
     print(file_c)
@@ -166,7 +173,6 @@ def tillagning(namnrecept):
     print("Receptet är sparat i ditt skafferi, skafferi.txt")
     print("  ")
     main()
-        
 
- 
+
 main()
